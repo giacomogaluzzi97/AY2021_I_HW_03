@@ -10,16 +10,27 @@
  * ========================================
 */
 #include "project.h"
+#include "RGBLedDriver.h"
+#include "InterruptRoutine_UART.h"
+#include "InterruptRoutine_TIMER.h"
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-
+    
+    /* initialization */
+    
+    isr_timer_StartEx(TIMER_ISR);
+    Timer_Start();
+    isr_UART_StartEx(UART_RX_ISR);
+    UART_Start();
+    PWM_RG_Start();
+    PWM_B_Start();
+    RGBLed_InitializeColor();
+    
     for(;;)
     {
-        /* Place your application code here. */
+        States(); 
     }
 }
 
