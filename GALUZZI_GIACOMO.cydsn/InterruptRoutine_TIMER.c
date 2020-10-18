@@ -19,4 +19,5 @@ CY_ISR(TIMER_ISR)
     Timer_ReadStatusRegister();
     five_sec = 1; 
 }
+
 /* [] END OF FILE */
