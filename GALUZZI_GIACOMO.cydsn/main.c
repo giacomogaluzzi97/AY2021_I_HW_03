@@ -14,6 +14,7 @@
 #include "InterruptRoutine_UART.h"
 #include "InterruptRoutine_TIMER.h"
 
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
@@ -21,16 +22,16 @@ int main(void)
     /* initialization */
     
     isr_timer_StartEx(TIMER_ISR);
-    Timer_Start();
     isr_UART_StartEx(UART_RX_ISR);
     UART_Start();
     PWM_RG_Start();
     PWM_B_Start();
     RGBLed_InitializeColor();
+    Micro_Init();
     
     for(;;)
     {
-        States(); 
+        Micro_Manager(); 
     }
 }
 

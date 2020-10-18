@@ -1,44 +1,32 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/* ================================================*/
+/* ----------------- LED DRIVER H -----------------*/
+/* ================================================*/
+
 #ifndef __RGB_LED_DRIVER_H__
     #define __RGB_LED_DRIVER_H__
     
-    #define IDLE 0
-    #define HEADER 1
-    #define RED 2
-    #define GREEN 3
-    #define BLU 4
-    #define TAIL 5
-    #define PERIODTIMER 250
+    #include "global.h"
     
-    #include "cytypes.h"
-    #include "project.h"
+    void RGBLed_Start();
+    void RGBLed_Stop();
+    void RGBLed_InitializeColor();
+    void Packet_Read();
+    void Micro_Init();
+    void Micro_Manager();
     
-    uint8_t state = IDLE; //variabile dell stato
+/* ================================================*/
+/* ---------------- COLORS STRUCT -----------------*/
+/* ================================================*/    
     
     typedef struct {
         uint8_t red;
         uint8_t green;
         uint8_t blu;
     } Colors;    
-       
-    void RGBLed_Start();
-    void RGBLed_Stop();
     
-    void RGBLed_InitializeColor();
+    Colors color_pack;
+
     void RGBLed_WriteColor(Colors c);
-    
-    void States();
-    
-    
+   
 #endif    
 /* [] END OF FILE */

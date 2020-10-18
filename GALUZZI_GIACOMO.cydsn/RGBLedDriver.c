@@ -1,22 +1,14 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/* ================================================*/
+/* ----------------- LED DRIVER C -----------------*/
+/* ================================================*/
 
-#include "project.h"
 #include "RGBLedDriver.h"
 #include "PWM_RG.h"
 #include "PWM_B.h"
-#include "InterruptRoutine_UART.h"
-#include "InterruptRoutine_TIMER.h"
 
+/* ================================================*/
+/* ----------------- FUNZIONI LED -----------------*/
+/* ================================================*/
 void RGBLed_Start()
 {
     PWM_RG_Start();
@@ -27,181 +19,147 @@ void RGBLed_Stop()
     PWM_RG_Stop();
     PWM_B_Stop();
 }
-
 void RGBLed_WriteColor(Colors c)
 {
     PWM_RG_WriteCompare1(c.red);
     PWM_RG_WriteCompare2(c.green);    
     PWM_B_WriteCompare(c.blu);
 }
-
 void RGBLed_InitializeColor()
 {
     PWM_RG_WriteCompare1(0);
     PWM_RG_WriteCompare2(0);    
     PWM_B_WriteCompare(0);
 }    
-
-uint8_t received = 0;
-uint8_t five_sec = 0;
-
-Colors color;
-
-/* ================================================== */
-
-void States()
+void Micro_Init()
 {
-   
-    switch(state)
+    Timer_WriteCounter(TIMER_PERIOD);
+    byte = 0;
+    idle = 0;
+}    
+
+/* ================================================*/
+/* ----------------- PACKET READ ------------------*/
+/* ================================================*/
+
+void Packet_Read()
+{
+    /* header */
+    if(byte == 0 && idle == 1)
     {
-        case IDLE:
-                if(received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() == 0xA0)
-                {
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = RED;
-                }
-                else if (received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() == 'v')
-                {
-                    received = 0;
-                    UART_PutString("RGB LED Program $$$\r\n");
-                }
-                else if (five_sec == 1)
-                {
-                    UART_PutString("Time out!\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    
-                }
-                else 
-                {
-                    UART_PutString("Invalid character\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                }   
-        break;
-         
-        case RED:
-                if(received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() <= 0xFF
-                   && UART_ReadRxData() >= 0x00)
-                {
-                    color.red = UART_ReadRxData();
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = GREEN;
-                }
-                else if (five_sec == 1)
-                {
-                    UART_PutString("Time out!\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }
-                else 
-                {
-                    UART_PutString("Invalid character\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }   
-        break;
-        
-        case GREEN:
-                if(received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() <= 0xFF
-                   && UART_ReadRxData() >= 0x00)
-                {
-                    color.green = UART_ReadRxData();
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = BLU;
-                }
-                else if (five_sec == 1)
-                {
-                    UART_PutString("Time out!\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }
-                else 
-                {
-                    UART_PutString("Invalid character\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }   
-        break;
-                
-        case BLU:
-                if(received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() <= 0xFF
-                   && UART_ReadRxData() >= 0x00)
-                {
-                    color.blu = UART_ReadRxData();
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = TAIL;
-                }
-                else if (five_sec == 1)
-                {
-                    UART_PutString("Time out!\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }
-                else 
-                {
-                    UART_PutString("Invalid character\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }   
-        break; 
-                
-        case TAIL:
-                if(received == 1
-                   && five_sec != 1
-                   && UART_ReadRxData() == 0xC0)
-                {
-                    RGBLed_WriteColor(color);
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }
-                else if (five_sec == 1)
-                {
-                    UART_PutString("Time out!\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }
-                else 
-                {
-                    UART_PutString("Invalid character\r\n");
-                    five_sec = 0;
-                    received = 0;
-                    Timer_WriteCounter(PERIODTIMER);
-                    state = IDLE;
-                }  
-        break;        
+        packet = UART_ReadRxData();
+        if(packet == 'v')
+        {
+            gui_call = 1;
+        }
+        else if(packet != 0xA0)
+        {
+            wrong_header = 1;
+        }    
+    }      
+    /* red */
+    if(byte == 1 && idle == 1) 
+    {
+        packet = UART_ReadRxData();
+        if(packet <= 0x00 || packet >= 0xFF)
+        {
+            wrong_value = 1;
+        }   
+        else
+        {
+            color_pack.red = packet;
+        }    
     }   
+    /* green */
+    if(byte == 2 && idle == 1) 
+    {
+        packet = UART_ReadRxData();
+        if(packet <= 0x00 || packet >= 0xFF)
+        {
+            wrong_value = 1;
+        }   
+        else
+        {
+            color_pack.green = packet;
+        }    
+    }  
+    /* blu */
+    if(byte == 3 && idle == 1) 
+    {
+        packet = UART_ReadRxData();
+        if(packet <= 0x00 || packet >= 0xFF)
+        {
+            wrong_value = 1;
+        }   
+        else
+        {
+            color_pack.blu = packet;
+        }    
+    }
+    /* tail */
+    if(byte == 4 && idle == 1) 
+    {
+        packet = UART_ReadRxData();
+        if(packet != 0xC0)
+        {
+            wrong_tail = 1;
+        }  
+        else 
+        {
+            packet_arrived = 1;
+            RGBLed_WriteColor(color_pack);
+        }    
+    } 
+    
 }
 
+/* ================================================*/
+/* ---------------- MICRO MANAGER -----------------*/
+/* ================================================*/
+
+void Micro_Manager()
+{
+    /* GUI call */
+    if(gui_call == 1)
+    {
+        UART_PutString("RGB LED Program $$$");
+        gui_call = 0;
+        Micro_Init();
+    }
+    /* Timeout */
+    if(timeout == 1)
+    {
+        UART_PutString("Timeout!\r\n");
+        timeout = 0;
+        Micro_Init();
+    }
+    /* wrong header */
+    if(wrong_header == 1)
+    {
+        UART_PutString("Wrong packet's header\r\n");
+        wrong_header = 0;
+        Micro_Init();
+    }
+    /* wrong value */
+    if(wrong_value == 1)
+    {
+        UART_PutString("Wrong packet's color value\r\n");
+        wrong_value = 0;
+        Micro_Init();
+    }
+    /* wrong tail */
+    if(wrong_tail == 1)
+    {
+        UART_PutString("Wrong packet's tail\r\n");
+        wrong_header = 0;
+        Micro_Init();
+    }
+    /* packet arrived */
+    if(packet_arrived == 1)
+    {
+        UART_PutString("Packet arrived\r\n");
+        packet_arrived = 0;
+        Micro_Init();
+    }
+}    
 /* [] END OF FILE */
