@@ -33,7 +33,7 @@ void RGBLed_InitializeColor()
 }    
 void Micro_Init()
 {
-    Timer_WriteCounter(TIMER_PERIOD);
+    Timer_Stop();
     byte = 0;
     idle = 0;
 }    
@@ -61,7 +61,7 @@ void Packet_Read()
     if(byte == 1 && idle == 1) 
     {
         packet = UART_ReadRxData();
-        if(packet <= 0x00 || packet >= 0xFF)
+        if(!(packet >= 0 || packet <= 255))
         {
             wrong_value = 1;
         }   
@@ -74,7 +74,7 @@ void Packet_Read()
     if(byte == 2 && idle == 1) 
     {
         packet = UART_ReadRxData();
-        if(packet <= 0x00 || packet >= 0xFF)
+        if(!(packet >= 0 || packet <= 255))
         {
             wrong_value = 1;
         }   
@@ -87,7 +87,7 @@ void Packet_Read()
     if(byte == 3 && idle == 1) 
     {
         packet = UART_ReadRxData();
-        if(packet <= 0x00 || packet >= 0xFF)
+        if(!(packet >= 0 || packet <= 255))
         {
             wrong_value = 1;
         }   
@@ -151,7 +151,7 @@ void Micro_Manager()
     if(wrong_tail == 1)
     {
         UART_PutString("Wrong packet's tail\r\n");
-        wrong_header = 0;
+        wrong_tail = 0;
         Micro_Init();
     }
     /* packet arrived */

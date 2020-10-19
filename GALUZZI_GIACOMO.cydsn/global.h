@@ -15,7 +15,7 @@ extern _Bool wrong_tail;
 extern _Bool packet_arrived;
 extern _Bool timeout;
 
-extern uint8_t packet;
+extern char packet;
 extern uint8_t byte;
     
 /* [] END OF FILE */
