@@ -173,11 +173,9 @@ void Micro_Manager()
     if(ok == 1)
     {   
         UART_PutString("Correct byte\r\n");
-        Timer_Stop();
         ok = 0;
         idle = 0;
-        Timer_Start();
-        Timer_WriteCounter(250);
+        Timer_WriteCounter(TIMER_PERIOD);
     }    
 }   
 
