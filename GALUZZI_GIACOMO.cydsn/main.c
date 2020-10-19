@@ -31,7 +31,7 @@ int main(void)
     Micro_Init();
     
     for(;;)
-    {
+    {   
         Micro_Manager(); 
     }
 }

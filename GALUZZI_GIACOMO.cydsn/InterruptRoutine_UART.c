@@ -14,6 +14,7 @@ CY_ISR(UART_RX_ISR)
     {   
         idle = 1; 
         Timer_Start();
+        Timer_WriteCounter(250);
         Packet_Read();
         byte ++;
     }

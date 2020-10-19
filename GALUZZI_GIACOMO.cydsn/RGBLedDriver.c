@@ -61,7 +61,6 @@ void Packet_Read()
         else
         {
             ok = 1;
-            Timer_Start();
         }    
     }    
     /* red */
@@ -76,7 +75,6 @@ void Packet_Read()
         {
             color_pack.red = packet;
             ok = 1;
-            Timer_Start();
         }    
     }   
     /* green */
@@ -91,7 +89,6 @@ void Packet_Read()
         {
             color_pack.green = packet;
             ok = 1;
-            Timer_Start();
         }    
     }  
     /* blu */
@@ -106,7 +103,6 @@ void Packet_Read()
         {
             color_pack.blu = packet;
             ok = 1;
-            Timer_Start();
         }    
     }
     /* tail */
@@ -176,10 +172,12 @@ void Micro_Manager()
     }
     if(ok == 1)
     {   
-        Timer_Stop();
         UART_PutString("Correct byte\r\n");
+        Timer_Stop();
         ok = 0;
         idle = 0;
+        Timer_Start();
+        Timer_WriteCounter(250);
     }    
 }   
 
