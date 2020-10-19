@@ -12,4 +12,5 @@
     CY_ISR_PROTO(UART_RX_ISR);
     
 #endif
+
 /* [] END OF FILE */

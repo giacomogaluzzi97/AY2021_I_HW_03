@@ -11,8 +11,10 @@ _Bool wrong_value = 0;
 _Bool wrong_tail = 0;
 _Bool packet_arrived = 0;
 _Bool timeout = 0;
+_Bool ok = 0;
 
 char packet = 0;
 uint8_t byte = 0;
+
 
 /* [] END OF FILE */

@@ -36,6 +36,7 @@ void Micro_Init()
     Timer_Stop();
     byte = 0;
     idle = 0;
+    ok = 0;
 }    
 
 /* ================================================*/
@@ -44,6 +45,7 @@ void Micro_Init()
 
 void Packet_Read()
 {
+   
     /* header */
     if(byte == 0 && idle == 1)
     {
@@ -55,10 +57,15 @@ void Packet_Read()
         else if(packet != 0xA0)
         {
             wrong_header = 1;
+        }
+        else
+        {
+            ok = 1;
+            Timer_Start();
         }    
-    }      
+    }    
     /* red */
-    if(byte == 1 && idle == 1) 
+    else if(byte == 1 && idle == 1) 
     {
         packet = UART_ReadRxData();
         if(!(packet >= 0 || packet <= 255))
@@ -68,10 +75,12 @@ void Packet_Read()
         else
         {
             color_pack.red = packet;
+            ok = 1;
+            Timer_Start();
         }    
     }   
     /* green */
-    if(byte == 2 && idle == 1) 
+    else if(byte == 2 && idle == 1) 
     {
         packet = UART_ReadRxData();
         if(!(packet >= 0 || packet <= 255))
@@ -81,10 +90,12 @@ void Packet_Read()
         else
         {
             color_pack.green = packet;
+            ok = 1;
+            Timer_Start();
         }    
     }  
     /* blu */
-    if(byte == 3 && idle == 1) 
+    else if(byte == 3 && idle == 1) 
     {
         packet = UART_ReadRxData();
         if(!(packet >= 0 || packet <= 255))
@@ -94,10 +105,12 @@ void Packet_Read()
         else
         {
             color_pack.blu = packet;
+            ok = 1;
+            Timer_Start();
         }    
     }
     /* tail */
-    if(byte == 4 && idle == 1) 
+    else if(byte == 4 && idle == 1) 
     {
         packet = UART_ReadRxData();
         if(packet != 0xC0)
@@ -161,5 +174,13 @@ void Micro_Manager()
         packet_arrived = 0;
         Micro_Init();
     }
-}    
+    if(ok == 1)
+    {   
+        Timer_Stop();
+        UART_PutString("Correct byte\r\n");
+        ok = 0;
+        idle = 0;
+    }    
+}   
+
 /* [] END OF FILE */
